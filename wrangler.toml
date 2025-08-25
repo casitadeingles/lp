@@ -1,0 +1,5 @@
+name = "casita-retiro"
+pages_build_output_dir = ""
+
+[vars]
+GAS_WEBHOOK = "https://script.google.com/macros/s/AKfycbxmRvy-nQ3pJSNYZM0ZMSt9h2jh3TbWWwQjynpSQdaMqYOA6dz79p-1SbBKVuw8FDL-KQ/exec"
