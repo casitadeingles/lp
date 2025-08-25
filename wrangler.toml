@@ -2,4 +2,4 @@ name = "casita-retiro"
 pages_build_output_dir = ""
 
 [vars]
-GAS_WEBHOOK = "https://script.google.com/a/macros/lacasitadeingles.com/s/AKfycbytMtyi8d9UW8GMFpKmssHkZD9Mj1_S5NeggJVe9q8_uw4cnwXalrjmuVminqsURf2Ylg/exec"
+GAS_WEBHOOK = "https://script.google.com/macros/s/AKfycbytMtyi8d9UW8GMFpKmssHkZD9Mj1_S5NeggJVe9q8_uw4cnwXalrjmuVminqsURf2Ylg/exec"
