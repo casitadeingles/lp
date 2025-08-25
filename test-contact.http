@@ -1,0 +1,41 @@
+### Test local API (localhost)
+POST http://localhost:8788/contact
+Content-Type: application/json
+
+{
+  "academia": "Retiro Pacífico",
+  "nombre": "Pablo",
+  "apellido": "Ruano",
+  "email": "pablo@example.com",
+  "telefono": "+34 600 000 000",
+  "ano": "2015",
+  "program": "Home Circle",
+  "newsletter": true,
+  "privacy": true,
+  "utm_source": "google",
+  "utm_medium": "cpc",
+  "utm_campaign": "spring",
+  "utm_term": "kids english",
+  "utm_content": "ad1"
+}
+
+### Test deployed site (Cloudflare Pages)
+POST https://retiro.lacasitadeingles.com/contact
+Content-Type: application/json
+
+{
+  "academia": "Retiro Pacífico",
+  "nombre": "Pablo",
+  "apellido": "Ruano",
+  "email": "pablo@example.com",
+  "telefono": "+34 600 000 000",
+  "ano": "2015",
+  "program": "Home Circle",
+  "newsletter": true,
+  "privacy": true,
+  "utm_source": "google",
+  "utm_medium": "cpc",
+  "utm_campaign": "spring",
+  "utm_term": "kids english",
+  "utm_content": "ad1"
+}

@@ -1,0 +1,10 @@
+{
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Preview index.html in Chrome",
+      "file": "${workspaceFolder}/index.html"
+    }
+  ]
+}
