@@ -1,0 +1,1482 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-PZKGJTH");
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+    />
+    <title>Inglés divertido en Cataluña · La Casita de Inglés</title>
+
+    <link rel="icon" href="img/favicon.png" type="image/x-icon" />
+
+    <!-- Tailwind vía CDN – sin build -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "brand-teal": "#009CA2",
+              "brand-green": "#1BA231",
+              "brand-purple": "#A86AA6",
+              "brand-pink": "#E2528B", // main call-out
+              "brand-yellow": "#E9BA00",
+              "brand-orange": "#EA742E",
+            },
+          },
+        },
+      };
+
+      const locations = [
+        {
+          name: "Poblenou (Próximamente)",
+          address: "Carrer de Llull, 256, Barcelona, 08005",
+          phone: "722 501 660",
+          email: "poblenou@lacasitadeingles.com",
+          lat: 41.4037675,
+          lon: 2.2059664,
+          rating: null,
+          user_ratings_total: null,
+          default: true,
+        },
+        {
+          name: "Sant Cugat del Vallès",
+          address:
+            "Carrer d'Avel lina Casadevall, 2, Sant Cugat del Vallès, Barcelona, 08174",
+          phone: "666 707 798",
+          email: "santcugat@lacasitadeingles.com",
+          lat: 41.4728432,
+          lon: 2.0817809,
+          place_id: "ChIJlZ5CHmqRpBIRtd7ioQ_uPP4",
+          rating: 5,
+          user_ratings_total: 62,
+        },
+      ];
+      const defaultLocations = locations.filter((l) => l.default);
+      const randomDefault =
+        defaultLocations[Math.floor(Math.random() * defaultLocations.length)] ||
+        locations[0];
+      const ratedLocations = locations.filter(
+        (l) => l.rating && l.user_ratings_total,
+      );
+      const totalReviews = ratedLocations.reduce(
+        (sum, l) => sum + l.user_ratings_total,
+        0,
+      );
+      const weightedRating = ratedLocations.length
+        ? (
+            ratedLocations.reduce(
+              (sum, l) => sum + l.rating * l.user_ratings_total,
+              0,
+            ) / totalReviews
+          ).toFixed(1)
+        : "0";
+    </script>
+
+    <!-- Fuente Nunito -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      [x-cloak] {
+        display: none !important;
+      }
+
+      body {
+        font-family: "Nunito", sans-serif;
+      }
+
+      /* Title font */
+      @font-face {
+        font-family: "Casita-Title";
+        src: url("fonts/casita title font.woff2") format("woff2");
+        font-weight: 700;
+        font-display: swap;
+      }
+
+      h2,
+      h3 {
+        font-family: "Casita-Title", sans-serif;
+      }
+
+      .hero-bg-bunny {
+        background-image: url("img/ninacamiseta-tiny.jpg");
+        background-size: cover;
+        background-position: left;
+      }
+
+      .hero-bg-koala {
+        background-image: url("img/camiazulTINY.jpg");
+        background-size: cover;
+        background-position: right;
+      }
+
+      /* Map marker label */
+      .map-label {
+        background: #fff;
+        border: 1px solid #e2528b;
+        color: #e2528b;
+        font-weight: bold;
+        padding: 0 4px;
+        border-radius: 4px;
+        font-size: 12px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+
+      /*
+     * La altura del hero se calcula con JavaScript en `index.html` para evitar
+     * los problemas de 100vh en Chrome iOS cuando desaparece la barra inferior.
+     * Mantenemos únicamente los estilos de fondo en estas clases.
+     */
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+  </head>
+
+  <body x-data="mainApp()" class="antialiased text-gray-800 bg-white">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-PZKGJTH"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Sticky Brand Bar -->
+    <header
+      x-data="{ menuOpen: false }"
+      class="sticky top-0 z-[900] bg-white/90 backdrop-blur shadow-sm relative"
+    >
+      <div
+        class="max-w-5xl mx-auto flex items-center justify-between px-4 h-14 relative"
+      >
+        <a href="/" class="flex items-center gap-2">
+          <img
+            src="img\lcdi_logo_header_90px.png"
+            alt="La Casita de Inglés"
+            class="h-8 w-auto sm:max-w-none"
+          />
+        </a>
+        <button @click="menuOpen = !menuOpen" class="p-2" aria-label="Menú">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+        <nav
+          x-cloak
+          x-show="menuOpen"
+          @click.away="menuOpen=false"
+          class="absolute right-2 top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-xl text-right py-2 px-0 flex flex-col gap-0 z-50"
+        >
+          <a
+            href="#programas"
+            @click="menuOpen=false"
+            class="block px-6 py-3 text-gray-800 hover:bg-brand-pink/10 hover:text-brand-pink font-medium rounded-t-xl transition-colors"
+            >Programas</a
+          >
+          <a
+            href="#beneficios"
+            @click="menuOpen=false"
+            class="block px-6 py-3 text-gray-800 hover:bg-brand-pink/10 hover:text-brand-pink font-medium transition-colors"
+            >Beneficios</a
+          >
+          <a
+            href="#testimonials"
+            @click="menuOpen=false"
+            class="block px-6 py-3 text-gray-800 hover:bg-brand-pink/10 hover:text-brand-pink font-medium transition-colors"
+            >Testimonios</a
+          >
+          <a
+            href="#locations"
+            @click="menuOpen=false"
+            class="block px-6 py-3 text-gray-800 hover:bg-brand-pink/10 hover:text-brand-pink font-medium transition-colors"
+            >Academias</a
+          >
+          <a
+            href="#"
+            @click.prevent="openForm(''); menuOpen=false"
+            class="block px-6 py-3 text-gray-800 hover:bg-brand-pink/10 hover:text-brand-pink font-medium rounded-b-xl transition-colors"
+            >Contacto</a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section
+      id="hero"
+      :class="[heroClass, 'relative text-white text-center flex flex-col items-center justify-center']"
+    >
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30"
+      ></div>
+      <h1
+        class="relative z p-1-10 text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4"
+      >
+        ¡El Inglés más divertido!
+      </h1>
+      <p class="relative z-10 text-lg sm:text-xl mb-4 p-1">
+        Profesores nativos · Grupos reducidos · Play-Based Learning
+      </p>
+      <ul
+        class="relative z-10 flex flex-wrap justify-center gap-4 text-xs text-white/80 mb-8"
+      >
+        <li>20 años de experiencia</li>
+        <li class="hidden sm:inline">17 k seguidores</li>
+        <li>2 academias en Cataluña</li>
+      </ul>
+      <div class="relative z-10 mb-6">
+        <a
+          href="#"
+          @click.prevent="openReviews()"
+          class="inline-flex items-center gap-1 bg-white text-black font-semibold py-1.5 px-3 rounded-full shadow hover:bg-yellow-300 text-sm"
+        >
+          <span x-text="weightedRating"></span>
+          <span
+            x-html="starIcons(parseFloat(weightedRating))"
+            class="ml-1"
+          ></span>
+          <span
+            x-text="`(${Number(totalReviews).toLocaleString('es-ES')} reseñas)`"
+          ></span>
+        </a>
+      </div>
+      <div class="relative z-10 flex flex-col sm:flex-row gap-4">
+        <a
+          href="#"
+          @click.prevent="openForm('')"
+          class="cta-book inline-block bg-white text-brand-pink hover:bg-gray-100 font-bold py-4 px-8 rounded-full shadow-xl text-lg transition"
+          >Reserva tu clase GRATIS</a
+        >
+        <a
+          href="#programas"
+          class="inline-block border-2 border-white hover:border-gray-200 text-white hover:text-gray-200 font-bold py-4 px-8 rounded-full shadow text-lg transition"
+          >Ver programas</a
+        >
+      </div>
+    </section>
+
+    <!-- Programas -->
+    <section id="programas" class="max-w-5xl mx-auto px-4 pt-16">
+      <h2 class="text-3xl font-extrabold text-center mb-6">
+        Nuestros Programas
+      </h2>
+      <p class="text-center mb-8">
+        En La Casita de Inglés aplicamos el Play-Based Learning adaptado a cada
+        edad.
+      </p>
+      <div class="space-y-4">
+        <details class="border rounded-2xl p-4">
+          <summary class="cursor-pointer text-xl font-bold" translate="no">
+            Babies (0-2 años)
+          </summary>
+          <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-center mb-6">
+              Exploran en confianza
+            </h3>
+            <div class="grid gap-8 sm:grid-cols-2 justify-center">
+              <div
+                class="border rounded-2xl p-6 shadow hover:shadow-lg transition flex flex-col bg-gradient-to-br from-brand-yellow/10 to-white info-card"
+              >
+                <h3 class="text-xl font-bold mb-1" translate="no">
+                  Baby &amp; Me
+                </h3>
+                <p class="mb-4">
+                  Inmersión total en inglés desde el primer año de vida. En
+                  grupos hiper-reducidos, los bebés exploran música, movimiento
+                  y juego sensorial junto a un adulto de confianza, guiados por
+                  profes nativos. El vínculo afectivo y la exposición auditiva
+                  temprana activan las áreas de adquisición del idioma en su
+                  momento más plástico.
+                </p>
+                <p class="text-sm mb-2">👥 Máx. 6 familias</p>
+                <p class="text-sm mb-2">💂‍♀️ Profes 100% nativos</p>
+                <a
+                  href="#"
+                  @click.prevent="openForm('Baby &amp; Me')"
+                  class="cta-book mt-auto inline-block bg-brand-pink hover:bg-brand-purple text-white font-bold py-2 px-6 rounded-full"
+                  >Reserva tu clase gratuita</a
+                >
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details id="kids-panel" class="border rounded-2xl p-4" open>
+          <summary class="cursor-pointer text-xl font-bold" translate="no">
+            Kids (3–8 años)
+          </summary>
+          <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-center mb-6">
+              Aprenden sin darse cuenta...
+            </h3>
+            <div class="grid gap-8 sm:grid-cols-2 justify-center">
+              <div
+                class="border rounded-2xl p-6 shadow hover:shadow-lg transition flex flex-col bg-gradient-to-br from-brand-purple/10 to-white info-card"
+              >
+                <h3 class="text-xl font-bold mb-1" translate="no">
+                  Home Circle
+                </h3>
+                <p class="mb-4">
+                  Nuestra experiencia estrella: 2 horas seguidas a la semana.
+                  Rotación cada 30 min en espacios de juego, creatividad y
+                  movimiento:
+                </p>
+                <ul class="list-disc list-inside text-sm mb-4 space-y-1">
+                  <li>🎨 Sala de Manualidades y Cocina</li>
+                  <li>💃 Sala de Baile</li>
+                  <li>🎲 Sala de Juegos de Mesa</li>
+                  <li>🎭 Sala de Teatro y Yoga</li>
+                </ul>
+                <p class="text-sm mb-2">
+                  👥 Máx. 8 alumnos | Agrupamos por edad
+                </p>
+                <p class="text-sm mb-2">💂‍♀️ Profes 100% nativos</p>
+                <p class="text-sm text-gray-600 mb-6">
+                  L‑V 17:30–19:30 | Sáb 11:00–13:00
+                </p>
+                <a
+                  href="#"
+                  @click.prevent="openForm('Home Circle')"
+                  class="cta-book mt-auto inline-block bg-brand-pink hover:bg-brand-purple text-white font-bold py-2 px-6 rounded-full"
+                  >Reserva tu clase gratuita</a
+                >
+              </div>
+              <div
+                class="border rounded-2xl p-6 shadow hover:shadow-lg transition flex flex-col bg-gradient-to-br from-brand-purple/10 to-white info-card"
+              >
+                <h3 class="text-xl font-bold mb-1" translate="no">
+                  Home Express Kids
+                </h3>
+                <p class="mb-4">
+                  Mismo método que Home Circle, pero en 1 hora semanal con
+                  cambio de actividad cada 15 min: Baile, Teatro, Manualidades y
+                  Juegos de mesa en una sola sala.
+                </p>
+                <p class="text-sm mb-2">
+                  👥 Máx. 8 alumnos | Agrupamos por edad
+                </p>
+                <p class="text-sm mb-2">💂‍♀️ Profes 100% nativos</p>
+                <p class="text-sm text-gray-600 mb-6">
+                  L‑V 17:30–18:30 / 18:30–19:30<br />Sáb 11:00–12:00 /
+                  12:00–13:00
+                </p>
+                <a
+                  href="#"
+                  @click.prevent="openForm('Home Express Kids')"
+                  class="cta-book mt-auto inline-block bg-brand-pink hover:bg-brand-purple text-white font-bold py-2 px-6 rounded-full"
+                  >Reserva tu clase gratuita</a
+                >
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <details id="juniors-panel" class="border rounded-2xl p-4">
+          <summary class="cursor-pointer text-xl font-bold" translate="no">
+            Juniors (9–12 años)
+          </summary>
+          <div class="mt-4">
+            <h3 class="text-2xl font-extrabold text-center mb-6">
+              Desarrollan sus habilidades en inglés
+            </h3>
+            <div class="grid gap-8 sm:grid-cols-2 justify-center">
+              <div
+                class="border rounded-2xl p-6 shadow hover:shadow-lg transition flex flex-col bg-gradient-to-br from-brand-teal/10 to-white info-card"
+              >
+                <h3 class="text-xl font-bold mb-1" translate="no">Home Run</h3>
+                <p class="mb-4">
+                  Para los pre-adolescentes. 2 horas semanales en formato
+                  rotativo. Trabajamos reading, writing, listening y speaking
+                  con retos creativos (escape-rooms, experiments, videoblogs,
+                  ...).
+                </p>
+                <ul class="list-disc list-inside text-sm mb-4 space-y-1">
+                  <li>🎨 Sala de Manualidades y Cocina</li>
+                  <li>🎯 Sala de Baile y Juegos Activos</li>
+                  <li>🗣️ Sala de Juegos de Mesa y Conversación</li>
+                  <li>🎭 Sala de Teatro y Yoga</li>
+                </ul>
+                <p class="text-sm mb-2">
+                  👥 Máx. 8 alumnos | Agrupamos por nivel Cambridge YLE/PET
+                </p>
+                <p class="text-sm mb-2">💂‍♀️ Profes 100% nativos</p>
+                <p class="text-sm text-gray-600 mb-6">
+                  L‑V 17:30–19:30 | Sáb 11:00–13:00
+                </p>
+                <a
+                  href="#"
+                  @click.prevent="openForm('Home Run')"
+                  class="cta-book mt-auto inline-block bg-brand-pink hover:bg-brand-purple text-white font-bold py-2 px-6 rounded-full"
+                  >Reserva tu clase gratuita</a
+                >
+              </div>
+              <div
+                class="border rounded-2xl p-6 shadow hover:shadow-lg transition flex flex-col bg-gradient-to-br from-brand-teal/10 to-white info-card"
+              >
+                <h3 class="text-xl font-bold mb-1" translate="no">
+                  Home Express Juniors
+                </h3>
+                <p class="mb-4">
+                  Mismo método que Home Run, pero en 1 hora semanal con cambio
+                  de actividad cada 15 min: Baile, Teatro, Manualidades y Juegos
+                  de mesa en una sola sala.
+                </p>
+                <p class="text-sm mb-2">
+                  👥 Máx. 8 alumnos | Agrupamos por nivel Cambridge YLE/PET
+                </p>
+                <p class="text-sm mb-2">💂‍♀️ Profes 100% nativos</p>
+                <p class="text-sm text-gray-600 mb-6">
+                  L‑V 17:30–18:30 / 18:30–19:30<br />Sáb 11:00–12:00 /
+                  12:00–13:00
+                </p>
+                <a
+                  href="#"
+                  @click.prevent="openForm('Home Express Juniors')"
+                  class="cta-book mt-auto inline-block bg-brand-pink hover:bg-brand-purple text-white font-bold py-2 px-6 rounded-full"
+                  >Reserva tu clase gratuita</a
+                >
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Beneficios -->
+    <section id="beneficios" class="max-w-5xl mx-auto px-4 py-8">
+      <div
+        class="bg-brand-yellow/10 border-l-4 border-brand-pink p-6 rounded-2xl info-card"
+      >
+        <h3
+          class="text-2xl font-bold text-brand-pink mb-4 flex items-center gap-2"
+        >
+          <span class="text-3xl">🌟</span> Beneficios para tu familia
+        </h3>
+        <ul
+          class="list-disc list-inside space-y-2 text-gray-700 leading-relaxed"
+        >
+          <li>
+            <strong>Desgravable en la Renta:</strong> la única extraescolar que
+            reduce tu IRPF.
+          </li>
+          <li>
+            <strong>Clases recuperables 30 días:</strong> reprograma online sin
+            papeleos.
+          </li>
+          <li>
+            <strong>Descuento familiar:</strong> –5 % al segundo hermano y –10 %
+            al tercero.
+          </li>
+          <li>
+            <strong>Promoción “Bring a Friend”:</strong> –20 € para ti y para tu
+            amigo <em>(acumulable)</em>.
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Instagram Feed -->
+    <section class="py-16 bg-brand-yellow px-4">
+      <h2 class="text-3xl font-extrabold text-center text-white mb-6">
+        Únete a nuestra comunidad
+        <a
+          href="https://www.instagram.com/casitadeingles/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-brand-pink hover:text-brand-purple underline"
+          >@casitadeingles</a
+        >
+      </h2>
+      <p class="text-center mt-4 text-gray-600">
+        16.000 familias nos siguen para ver historias diarias de nuestras clases
+      </p>
+    </section>
+
+    <!-- Testimonials -->
+    <section id="testimonials" class="bg-gray-50 py-16 px-4">
+      <h2 class="text-3xl font-extrabold text-center mb-12">
+        ¡Lo dicen los padres!
+      </h2>
+      <div class="text-center mb-12">
+        <a
+          href="#"
+          @click.prevent="openReviews()"
+          class="inline-block bg-brand-yellow/20 text-black font-bold py-3 px-4 rounded-xl shadow-lg text-xl"
+        >
+          <span
+            class="inline-block bg-white text-brand-pink px-2 py-1 rounded-md m-1"
+            x-text="Number(totalReviews).toLocaleString('es-ES')"
+          ></span>
+          familias nos dan
+          <div class="inline-block bg-white px-2 py-1 rounded-md m-1">
+            <span class="text-brand-pink" x-text="weightedRating"></span>
+            <span
+              x-html="starIcons(parseFloat(weightedRating))"
+              class="mx-1"
+            ></span>
+          </div>
+          en
+          <span class="text-blue-600 underline">Google</span>
+        </a>
+      </div>
+      <div class="max-w-3xl mx-auto aspect-video">
+        <iframe
+          class="w-full h-full rounded-xl shadow"
+          title="Testimonios La Casita de Inglés"
+          src="https://www.youtube.com/embed/5k7RnPEJg9w?si=k_GH0kZg88Rl7K92"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </section>
+
+    <!-- Map -->
+    <section id="locations" class="max-w-5xl mx-auto px-4 py-16">
+      <h2 class="text-3xl font-extrabold text-center mb-2">¿Dónde estamos?</h2>
+      <p class="text-center mb-8">Encuentra la academia que mejor te venga</p>
+      <div
+        id="search-controls"
+        class="mb-4 bg-gray-100 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center gap-2 text-sm"
+      >
+        <div class="flex-1 flex flex-col sm:flex-row gap-2">
+          <input
+            x-model="postcode"
+            type="text"
+            placeholder="Introduce tu código postal"
+            class="flex-1 px-2 py-1 rounded text-base"
+          />
+          <button
+            @click="dataLayer.push({event: 'searchedAcademy', search_method: 'postcode'}); findByPostcode()"
+            class="bg-white text-brand-pink border-2 border-brand-pink px-3 py-1 rounded w-full sm:w-auto"
+          >
+            Buscar por código postal
+          </button>
+        </div>
+        <button
+          @click="dataLayer.push({event: 'searchedAcademy', search_method: 'gps'}); findClosestLocation()"
+          class="bg-white text-brand-pink border-2 border-brand-pink px-3 py-1 rounded w-full sm:w-auto font-bold"
+        >
+          Usar mi ubicación
+        </button>
+      </div>
+      <template x-if="closestLocation">
+        <div
+          id="found-info"
+          class="mb-4 bg-gray-100 p-4 rounded text-sm shadow"
+        >
+          <p class="font-bold" x-text="closestLocation.name"></p>
+          <p x-text="closestLocation.address"></p>
+          <p x-text="closestLocation.email"></p>
+          <p x-text="closestLocation.phone"></p>
+          <template x-if="closestDistance !== null">
+            <p
+              class="text-brand-pink font-semibold"
+              x-text="`A ${closestDistance.toFixed(1)} km de ti`"
+            ></p>
+          </template>
+          <button
+            @click="openForm('')"
+            class="bg-brand-pink text-white px-3 py-1 rounded mt-2 w-full sm:w-auto cta-book"
+          >
+            Reserva tu clase gratuita
+          </button>
+        </div>
+      </template>
+      <div class="relative w-full h-96 rounded-2xl overflow-hidden shadow">
+        <div id="map" class="w-full h-full"></div>
+      </div>
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const map = L.map("map").setView([41.4037675, 2.2059664], 11);
+          window.MAP = map;
+          // Use CartoDB Positron (light, greyish) tiles
+          L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+            {
+              maxZoom: 19,
+              attribution: "&copy; OpenStreetMap &copy; CartoDB",
+            },
+          ).addTo(map);
+          const pinkIcon = L.icon({
+            iconUrl: "img/pin-pink.svg",
+            iconSize: [24, 36],
+            iconAnchor: [12, 36],
+            popupAnchor: [0, -36],
+          });
+          locations.forEach((loc) => {
+            if (loc.lat && loc.lon) {
+              L.marker([loc.lat, loc.lon], { icon: pinkIcon })
+                .addTo(map)
+                .bindTooltip(loc.name, {
+                  permanent: true,
+                  direction: "right",
+                  className: "map-label",
+                })
+                .on("click", () => {
+                  if (window.APP) window.APP.selectLocation(loc);
+                });
+            }
+          });
+        });
+      </script>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="relative bg-brand-teal text-white text-center py-12 px-4">
+      <h2 class="text-3xl md:text-4xl font-extrabold mb-4">
+        ¿Listo para que tus peques amen el inglés?
+      </h2>
+      <p class="mb-8 text-lg md:text-xl">
+        Abrimos grupos el <strong>1 de septiembre</strong> · ¡Plazas limitadas!
+      </p>
+      <a
+        href="#"
+        @click.prevent="openForm('')"
+        class="cta-book inline-block bg-white text-brand-pink hover:bg-gray-100 font-bold py-4 px-8 mb-6 text-lg rounded-full shadow-xl transition"
+        >Reserva tu clase GRATIS</a
+      >
+      <svg
+        class="absolute bottom-0 left-0 w-full"
+        viewBox="0 0 1440 75"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0,30 C360,90 720,-30 1080,30 C1260,60 1440,45 1440,45 L1440,75 L0,75 Z"
+          fill="#ffffff"
+        />
+      </svg>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 text-center pt-6 pb-24 text-sm">
+      <p>
+        ©
+        <script>
+          document.write(new Date().getFullYear());
+        </script>
+        <a href="https://lacasitadeingles.com" target="_blank" class="underline"
+          >La Casita de Inglés</a
+        >
+        ·
+        <a
+          href="https://lacasitadeingles.com/aviso-legal"
+          target="_blank"
+          class="underline"
+          >Aviso legal</a
+        >
+        |
+        <a
+          href="https://lacasitadeingles.com/politica-de-privacidad/"
+          target="_blank"
+          class="underline"
+          >Privacidad</a
+        >
+      </p>
+    </footer>
+
+    <!-- Contact Modal -->
+    <div
+      x-cloak
+      x-show="open"
+      class="fixed inset-0 top-14 bg-black/50 flex items-start justify-center overflow-y-auto p-4 z-[1000]"
+    >
+      <div class="bg-white rounded-xl p-6 max-w-md w-full relative">
+        <button
+          @click="close"
+          class="absolute top-2 right-2 w-8 h-8 text-2xl flex items-center justify-center text-gray-500"
+        >
+          ✕
+        </button>
+        <h2 class="text-2xl font-bold mb-4">Contáctanos</h2>
+        <div x-show="!success">
+          <form @submit.prevent="submit()" class="space-y-4">
+            <input type="hidden" x-model="form.program" />
+            <div>
+              <label class="block mb-1 font-bold">Academia</label>
+              <div class="flex gap-2 items-stretch">
+                <select
+                  x-model="form.academia"
+                  class="flex-1 min-w-0 border rounded p-2"
+                  required
+                >
+                  <template x-for="loc in locations" :key="loc.name">
+                    <option
+                      :value="loc.name"
+                      x-text="loc.name"
+                      :selected="loc.name === form.academia"
+                    ></option>
+                  </template>
+                </select>
+                <button
+                  type="button"
+                  @click="goToLocations"
+                  class="px-2 rounded bg-brand-pink text-white shrink-0"
+                  title="Buscar"
+                >
+                  Buscar
+                </button>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <div class="flex-1">
+                <label class="block mb-1 font-bold">Nombre *</label>
+                <input
+                  type="text"
+                  x-model="form.nombre"
+                  class="w-full border rounded p-2"
+                  required
+                />
+              </div>
+              <div class="flex-1">
+                <label class="block mb-1 font-bold">Apellido *</label>
+                <input
+                  type="text"
+                  x-model="form.apellido"
+                  class="w-full border rounded p-2"
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block mb-1 font-bold">Email *</label>
+              <input
+                type="email"
+                x-model="form.email"
+                class="w-full border rounded p-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block mb-1 font-bold">Número de teléfono *</label>
+              <input
+                type="tel"
+                x-model="form.telefono"
+                class="w-full border rounded p-2"
+                required
+              />
+            </div>
+            <div>
+              <label class="block mb-1 font-bold"
+                >Año de nacimiento de tu(s) peque(s) *</label
+              >
+              <div
+                class="w-full border rounded p-2 flex flex-wrap gap-2"
+                @click="$refs.anoInput.focus()"
+              >
+                <template x-for="(year, index) in form.anos" :key="index">
+                  <span
+                    class="bg-brand-pink/20 text-brand-pink px-2 py-1 rounded-full flex items-center"
+                  >
+                    <span x-text="year"></span>
+                    <button
+                      type="button"
+                      class="ml-1"
+                      @click.prevent="form.anos.splice(index,1)"
+                    >
+                      ×
+                    </button>
+                  </span>
+                </template>
+                <input
+                  x-ref="anoInput"
+                  x-model="anoTemp"
+                  @keydown="digitsOnly($event)"
+                  @keydown.enter.prevent="handleAno"
+                  @blur="handleAno"
+                  @input="handleAno"
+                  inputmode="numeric"
+                  pattern="\\d{4}"
+                  placeholder="Ej. 2021"
+                  class="flex-1 min-w-[80px] outline-none border-0 p-0"
+                />
+              </div>
+              <p x-show="!anoError" class="text-gray-500 text-xs mt-1">
+                Puedes añadir más de un año.
+              </p>
+              <p
+                x-show="anoError"
+                x-text="anoError"
+                class="text-red-500 text-xs mt-1"
+              ></p>
+            </div>
+            <div class="flex items-center">
+              <input
+                type="checkbox"
+                x-model="form.privacy"
+                class="mr-2"
+                required
+              />
+              <label
+                >Acepto la
+                <a
+                  href="https://lacasitadeingles.com/politica-de-privacidad/"
+                  target="_blank"
+                  class="underline"
+                  >Política de Privacidad</a
+                >
+                *</label
+              >
+            </div>
+            <div class="flex items-center">
+              <input type="checkbox" x-model="form.newsletter" class="mr-2" />
+              <label>Suscribirme al newsletter</label>
+            </div>
+            <div
+              x-show="message"
+              x-text="message"
+              class="bg-red-100 border border-red-400 text-red-700 rounded p-2 text-center text-sm"
+            ></div>
+            <div class="flex mt-2">
+              <button
+                type="submit"
+                class="flex-1 bg-brand-pink text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-2 disabled:opacity-50"
+                :disabled="submitting"
+              >
+                <svg
+                  x-show="submitting"
+                  class="animate-spin h-5 w-5 mr-1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+                <span x-text="submitting ? 'Enviando...' : 'Enviar'"></span>
+              </button>
+            </div>
+          </form>
+        </div>
+        <div
+          x-show="success"
+          class="py-8 flex flex-col items-center justify-center text-center space-y-4"
+        >
+          <p class="text-lg font-bold" x-text="message"></p>
+          <button
+            type="button"
+            @click="openWhatsapp()"
+            class="bg-green-500 text-white font-bold py-2 px-4 rounded flex items-center justify-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M20.52 3.48A11.906 11.906 0 0012 0C5.37 0 0 5.37 0 12c0 2.11.55 4.15 1.61 5.95L0 24l6.18-1.61A11.894 11.894 0 0012 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.21-3.48-8.52zM12 22.14a9.83 9.83 0 01-5-1.37l-.36-.21-3.68.96.98-3.59-.23-.37A9.87 9.87 0 012.86 12C2.86 6.93 6.93 2.86 12 2.86s9.14 4.07 9.14 9.14S17.07 21.14 12 21.14zm5.21-7.54c-.27-.14-1.63-.8-1.88-.89-.25-.09-.43-.14-.61.14-.18.27-.7.89-.86 1.07-.16.18-.32.2-.59.07-.27-.14-1.15-.42-2.19-1.34-.81-.72-1.36-1.61-1.52-1.88-.16-.27-.02-.41.12-.55.12-.12.27-.32.41-.48.14-.16.18-.27.27-.45.09-.18.05-.34-.02-.48-.07-.14-.61-1.47-.84-2.02-.22-.54-.45-.47-.61-.48-.16-.01-.34-.01-.52-.01-.18 0-.48.07-.73.34-.25.27-.96.94-.96 2.29 0 1.34.98 2.64 1.11 2.82.14.18 1.93 2.95 4.68 4.14.65.28 1.16.45 1.56.58.65.21 1.25.18 1.72.11.52-.07 1.63-.66 1.86-1.31.23-.66.23-1.23.16-1.31-.07-.09-.25-.14-.52-.27z"
+              />
+            </svg>
+            Whatsapp
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reviews Modal -->
+    <div
+      x-cloak
+      x-show="reviewsOpen"
+      class="fixed inset-0 top-14 bg-black/50 flex items-start justify-center overflow-y-auto p-4 z-[1000]"
+    >
+      <div class="bg-white rounded-xl p-6 max-w-md w-full relative">
+        <button
+          @click="closeReviews"
+          class="absolute top-2 right-2 w-8 h-8 text-2xl flex items-center justify-center text-gray-500"
+        >
+          ✕
+        </button>
+        <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+          Opiniones en
+          <img
+            src="img/google_on_white_hdpi.png"
+            alt="Google"
+            class="h-7 mb-0 inline-block align-middle"
+          />
+        </h2>
+
+        <template x-if="!selectedLocation">
+          <ul class="divide-y max-h-[60vh] overflow-y-auto">
+            <template x-for="loc in ratedLocations" :key="loc.name">
+              <li class="py-2 flex justify-between items-center">
+                <div>
+                  <p class="font-bold" x-text="loc.name"></p>
+                  <p class="text-sm">
+                    <span x-text="loc.rating.toFixed(1)"></span>
+                    <span x-html="starIcons(loc.rating)" class="ml-1"></span>
+                    (<span x-text="loc.user_ratings_total"></span> reseñas)
+                  </p>
+                </div>
+                <a
+                  href="#"
+                  @click.prevent="viewReviews(loc)"
+                  class="text-brand-pink underline text-sm"
+                  >ver reseñas</a
+                >
+              </li>
+            </template>
+          </ul>
+        </template>
+
+        <template x-if="selectedLocation">
+          <div>
+            <h3 class="font-bold mb-2" x-text="selectedLocation.name"></h3>
+            <ul class="divide-y max-h-[45vh] overflow-y-auto mb-4">
+              <template x-for="rev in reviews" :key="rev.time">
+                <li class="py-2">
+                  <p class="font-semibold" x-text="rev.author_name"></p>
+                  <p class="text-sm mb-1">
+                    <span x-text="rev.rating.toFixed(1)"></span>
+                    <span x-html="starIcons(rev.rating)" class="ml-1"></span>
+                  </p>
+                  <p class="text-sm" x-text="rev.text"></p>
+                  <p
+                    class="text-xs text-gray-500"
+                    x-text="new Date(rev.time * 1000).toLocaleDateString('es-ES')"
+                  ></p>
+                </li>
+              </template>
+            </ul>
+            <button
+              @click="selectedLocation=null"
+              class="w-full bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-full"
+            >
+              Volver a academias
+            </button>
+            <a
+              :href="`https://www.google.com/maps/search/?api=1&query_place_id=${selectedLocation.place_id}&query=${selectedLocation.lat},${selectedLocation.lon}`"
+              target="_blank"
+              class="block text-xs text-gray-400 underline text-center mt-2 mb-2 link-google-reviews"
+              >Ver más reseñas en Google</a
+            >
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <script>
+      function mainApp() {
+        const totalRev = totalReviews;
+        const weightRate = weightedRating;
+        const params = new URLSearchParams(window.location.search);
+        const heroClass =
+          params.get("focus") === "tweens" ? "hero-bg-koala" : "hero-bg-bunny";
+        const ratedLocs = ratedLocations;
+        const initialUtm = {
+          utm_source: params.get("utm_source") || "",
+          utm_medium: params.get("utm_medium") || "",
+          utm_campaign: params.get("utm_campaign") || "",
+          utm_term: params.get("utm_term") || "",
+          utm_content: params.get("utm_content") || "",
+        };
+        const fullStar =
+          '<svg class="w-4 h-4 inline text-yellow-400" viewBox="0 0 576 512" fill="currentColor" aria-hidden="true"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>';
+        const halfStar =
+          '<svg class="w-4 h-4 inline text-yellow-400" viewBox="0 0 576 512" fill="currentColor" aria-hidden="true"><path d="M309.5 13.5C305.5 5.2 297.1 0 287.9 0s-17.6 5.2-21.6 13.5L197.7 154.8 44.5 177.5c-9 1.3-16.5 7.6-19.3 16.3s-.5 18.1 5.9 24.5L142.2 328.4 116 483.9c-1.5 9 2.2 18.1 9.7 23.5s17.3 6 25.3 1.7l137-73.2 137 73.2c8.1 4.3 17.9 3.7 25.3-1.7s11.2-14.5 9.7-23.5L433.6 328.4 544.8 218.2c6.5-6.4 8.7-15.9 5.9-24.5s-10.3-14.9-19.3-16.3L378.1 154.8 309.5 13.5zM288 384.7l0-305.6 52.5 108.1c3.5 7.1 10.2 12.1 18.1 13.3l118.3 17.5L391 303c-5.5 5.5-8.1 13.3-6.8 21l20.2 119.6L299.2 387.5c-3.5-1.9-7.4-2.8-11.2-2.8z"/></svg>';
+        const emptyStar =
+          '<svg class="w-4 h-4 inline text-yellow-400 opacity-30" viewBox="0 0 576 512" fill="currentColor" aria-hidden="true"><path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/></svg>';
+        const starIcons = (r) => {
+          let html = "";
+          for (let i = 1; i <= 5; i++) {
+            if (r >= i) html += fullStar;
+            else if (r >= i - 0.5) html += halfStar;
+            else html += emptyStar;
+          }
+          return html;
+        };
+        return {
+          heroClass,
+          open: false,
+          reviewsOpen: false,
+          totalReviews: totalRev,
+          weightedRating: weightRate,
+          ratedLocations: ratedLocs,
+          starIcons,
+          selectedLocation: null,
+          reviews: [],
+          closestLocation: null,
+          closestDistance: null,
+          postcode: "",
+          userMarker: null,
+          form: {
+            academia: randomDefault.name,
+            email_academia: randomDefault.email,
+            nombre: "",
+            apellido: "",
+            email: "",
+            telefono: "",
+            anos: [],
+            program: "",
+            privacy: false,
+            newsletter: false,
+            ...initialUtm,
+          },
+          anoTemp: "",
+          anoError: "",
+          init() {
+            window.APP = this;
+            this.$watch("form.academia", (value) => {
+              const loc = locations.find((l) => l.name === value);
+              this.form.email_academia = loc ? loc.email : "";
+            });
+            this.$watch("closestLocation", (value) => {
+              if (value) {
+                this.$nextTick(() => {
+                  const controls = document.getElementById("search-controls");
+                  const box = document.getElementById("found-info");
+                  if (controls) {
+                    const nav = document.querySelector("header");
+                    const offset = (nav ? nav.offsetHeight : 0) + 5;
+                    const top =
+                      controls.getBoundingClientRect().top +
+                      window.pageYOffset -
+                      offset;
+                    window.scrollTo({ top, behavior: "smooth" });
+                  }
+                  if (box) {
+                    box.classList.add(
+                      "animate-pulse",
+                      "ring-2",
+                      "ring-brand-pink",
+                    );
+                    setTimeout(
+                      () =>
+                        box.classList.remove(
+                          "animate-pulse",
+                          "ring-2",
+                          "ring-brand-pink",
+                        ),
+                      1000,
+                    );
+                  }
+                });
+              }
+            });
+          },
+          submitting: false,
+          message: "",
+          success: false,
+          lastFormData: null,
+          initialUtm,
+          openForm(program) {
+            this.form.program = program || this.form.program || "";
+            this.open = true;
+            this.success = false;
+            this.message = "";
+            document.body.classList.add("overflow-hidden");
+          },
+          close() {
+            this.open = false;
+            this.message = "";
+            document.body.classList.remove("overflow-hidden");
+          },
+          openReviews() {
+            this.selectedLocation = null;
+            this.reviews = [];
+            this.reviewsOpen = true;
+            document.body.classList.add("overflow-hidden");
+            window.dataLayer?.push({ event: "openReviews" });
+          },
+          closeReviews() {
+            this.reviewsOpen = false;
+            this.selectedLocation = null;
+            document.body.classList.remove("overflow-hidden");
+          },
+          goToLocations() {
+            this.close();
+            this.$nextTick(() => {
+              const sec = document.getElementById("locations");
+              if (sec) sec.scrollIntoView({ behavior: "smooth" });
+            });
+          },
+          digitsOnly(e) {
+            if (
+              !/\d/.test(e.key) &&
+              ![
+                "Backspace",
+                "Delete",
+                "ArrowLeft",
+                "ArrowRight",
+                "Tab",
+                "Enter",
+              ].includes(e.key)
+            ) {
+              e.preventDefault();
+            }
+          },
+          handleAno() {
+            this.anoTemp = this.anoTemp.replace(/\D/g, "");
+            const year = this.anoTemp;
+            const current = new Date().getFullYear();
+            const min = current - 12;
+            if (year.length === 4) {
+              const age = current - parseInt(year, 10);
+              if (age >= 0 && age < 13 && !this.form.anos.includes(year)) {
+                this.form.anos.push(year);
+                this.anoTemp = "";
+                this.anoError = "";
+                return;
+              }
+              this.anoError = `El año debe estar entre ${min} y ${current}.`;
+              this.anoTemp = "";
+            } else {
+              this.anoError = "";
+            }
+          },
+          async viewReviews(loc) {
+            this.selectedLocation = loc;
+            this.reviews = [];
+            if (!window.PLACES_SERVICE) {
+              console.error("Google Maps API not loaded");
+              return;
+            }
+            window.PLACES_SERVICE.getDetails(
+              {
+                placeId: loc.place_id,
+                fields: ["review"],
+                language: "es",
+              },
+              (place, status) => {
+                if (
+                  status === google.maps.places.PlacesServiceStatus.OK &&
+                  place.reviews
+                ) {
+                  this.reviews = place.reviews
+                    .filter((r) => r.rating >= 4)
+                    .slice(0, 5);
+                  window.dataLayer?.push({ event: "viewReviews" });
+                } else {
+                  console.error("PlacesService error", status);
+                }
+              },
+            );
+          },
+          async submit() {
+            if (this.submitting) return;
+            this.submitting = true;
+
+            /*         Validación de campos */
+            this.message = "";
+            if (
+              !this.form.nombre ||
+              !this.form.apellido ||
+              !this.form.email ||
+              !this.form.telefono ||
+              this.form.anos.length === 0 ||
+              !this.form.academia
+            ) {
+              this.message = "Por favor, completa todos los campos requeridos";
+              this.submitting = false;
+              return;
+            }
+            let digits = this.form.telefono.replace(/\D/g, "");
+            if (digits.startsWith("34")) digits = digits.slice(2);
+            if (!/^[67]\d{8}$/.test(digits)) {
+              this.message = "Introduce un número de móvil válido";
+              this.submitting = false;
+              return;
+            }
+            const current = new Date().getFullYear();
+            if (
+              !this.form.anos.every((y) => {
+                const age = current - parseInt(y, 10);
+                return !isNaN(age) && age < 13 && age >= 0;
+              })
+            ) {
+              this.message =
+                "El año de nacimiento debe corresponder a un niño menor de 13 años";
+              this.submitting = false;
+              return;
+            }
+            if (!this.form.privacy) {
+              this.message = "Acepta la política de privacidad";
+              this.submitting = false;
+              return;
+            }
+
+            /* Dispara el evento para GTM */
+            try {
+              window.dataLayer = window.dataLayer || [];
+              window.dataLayer.push({
+                event: "leadFormSubmitted",
+                program: this.form.program || "",
+                academy: this.form.academia,
+                newsletter: this.form.newsletter ? "yes" : "no",
+                email: this.form.email.trim().toLowerCase(),
+                phone: (() => {
+                  let d = this.form.telefono.replace(/\D/g, "");
+                  if (!d.startsWith("34")) d = "34" + d.replace(/^0+/, "");
+                  return d;
+                })(),
+              });
+            } catch (err) {
+              console.error("Error pushing to dataLayer:", err);
+            }
+
+            /* Envío del formulario */
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 10000);
+            let resp;
+            try {
+              const payload = { ...this.form, ano: this.form.anos.join(", ") };
+              resp = await fetch("/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                signal: controller.signal,
+              });
+            } catch (err) {
+              window.dataLayer?.push({ event: "leadFormError" });
+              this.message =
+                "Ha ocurrido un error inesperado. Por favor, envíanos un email a retiro@lacasitadeingles.com.";
+              this.submitting = false;
+              clearTimeout(timeout);
+              return;
+            }
+            clearTimeout(timeout);
+
+            if (resp.ok) {
+              this.message =
+                "Solicitud enviada. Nos pondremos en contacto en breve 🎉";
+              const formData = { ...this.form, ano: this.form.anos.join(", ") };
+              this.lastFormData = formData;
+              this.form = {
+                academia: randomDefault.name,
+                email_academia: randomDefault.email,
+                nombre: "",
+                apellido: "",
+                email: "",
+                telefono: "",
+                anos: [],
+                program: "",
+                privacy: false,
+                newsletter: false,
+                ...this.initialUtm,
+              };
+              this.anoTemp = "";
+              this.success = true;
+            } else {
+              window.dataLayer?.push({ event: "leadFormError" });
+              this.message =
+                "Ha ocurrido un error inesperado. Por favor, envíanos un email a retiro@lacasitadeingles.com.";
+            }
+            this.submitting = false;
+          },
+          openWhatsapp() {
+            if (!this.lastFormData) return;
+            const data = this.lastFormData;
+            const loc = locations.find((l) => l.name === data.academia);
+            let phone = loc?.phone ? loc.phone.replace(/\D/g, "") : "621070732";
+            if (!phone.startsWith("34")) phone = "34" + phone;
+            const text = `Hola! He completado el formulario de contacto y me gustaría saber más sobre La Casita de Inglés.\nNombre: ${data.nombre} ${data.apellido}\nEmail: ${data.email}\nTel: ${data.telefono}\nAño alumno: ${data.ano}\nAcademia:  ${data.academia}\nPrograma: ${data.program}`;
+            const url =
+              "https://wa.me/" + phone + "?text=" + encodeURIComponent(text);
+            setTimeout(() => {
+              window.location.href = url;
+            }, 300);
+          },
+          toRad(v) {
+            return (v * Math.PI) / 180;
+          },
+          distance(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = this.toRad(lat2 - lat1);
+            const dLon = this.toRad(lon2 - lon1);
+            const a =
+              Math.sin(dLat / 2) ** 2 +
+              Math.cos(this.toRad(lat1)) *
+                Math.cos(this.toRad(lat2)) *
+                Math.sin(dLon / 2) ** 2;
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+          },
+          selectLocation(loc, distance = null) {
+            this.closestLocation = loc;
+            this.form.academia = loc.name;
+            this.closestDistance = distance;
+            if (window.MAP) window.MAP.setView([loc.lat, loc.lon], 14);
+            const input = document.querySelector(
+              '#search-controls input[type="text"]',
+            );
+            if (input) input.blur();
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport)
+              viewport.setAttribute(
+                "content",
+                "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
+              );
+            window.dataLayer?.push({
+              event: "searchedAcademy",
+              search_method: "map_click",
+            });
+          },
+          async findByPostcode() {
+            if (!this.postcode) return;
+            const q = this.postcode.trim();
+            if (!/^\d{5}$/.test(q)) return;
+            try {
+              let chosen = locations.find((l) =>
+                (l.owned_postcodes || []).includes(q),
+              );
+              if (!chosen) {
+                const resp = await fetch(
+                  `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=es&postalcode=${q}`,
+                );
+                const data = await resp.json();
+                if (data && data[0]) {
+                  const lat = parseFloat(data[0].lat);
+                  const lon = parseFloat(data[0].lon);
+                  let min = Infinity;
+                  locations.forEach((l) => {
+                    if (l.lat && l.lon) {
+                      const d = this.distance(lat, lon, l.lat, l.lon);
+                      if (d < min) {
+                        min = d;
+                        chosen = l;
+                      }
+                    }
+                  });
+                }
+              }
+              if (chosen) {
+                if (this.userMarker) {
+                  this.userMarker.remove();
+                  this.userMarker = null;
+                }
+                this.selectLocation(chosen);
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          },
+          findClosestLocation() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition((pos) => {
+              const { latitude, longitude } = pos.coords;
+              let closest = null;
+              let min = Infinity;
+              locations.forEach((l) => {
+                if (l.lat && l.lon) {
+                  const d = this.distance(latitude, longitude, l.lat, l.lon);
+                  if (d < min) {
+                    min = d;
+                    closest = l;
+                  }
+                }
+              });
+              if (closest) {
+                if (this.userMarker) {
+                  this.userMarker.remove();
+                  this.userMarker = null;
+                }
+                if (window.MAP) {
+                  this.userMarker = L.marker([latitude, longitude]).addTo(
+                    window.MAP,
+                  );
+                }
+                this.selectLocation(closest, min);
+              }
+            });
+          },
+        };
+      }
+
+      function setHeroHeight() {
+        const hero = document.getElementById("hero");
+        const header = document.querySelector("header");
+        if (hero && header) {
+          hero.style.height = window.innerHeight - header.offsetHeight + "px";
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", setHeroHeight);
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("focus") === "tweens") {
+          const kids = document.getElementById("kids-panel");
+          const juniors = document.getElementById("juniors-panel");
+          if (kids && juniors) {
+            kids.removeAttribute("open");
+            juniors.setAttribute("open", "");
+          }
+        }
+      });
+    </script>
+    <script>
+      function initPlaces() {
+        window.PLACES_SERVICE = new google.maps.places.PlacesService(
+          document.createElement("div"),
+        );
+      }
+    </script>
+    <script
+      async
+      defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDShemB0EIyHNLX2as3Iqkxk8jX8Tzj52I&libraries=places&callback=initPlaces&loading=async"
+    ></script>
+  </body>
+</html>
